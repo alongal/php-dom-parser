@@ -1,18 +1,35 @@
 <?php
 require_once "vendor/simplehtmldom/simple_html_dom.php";
 require_once "app/classes/AdClass.php";
+require_once "app/classes/AdClassValidator.php";
+require_once "app/classes/AdClassScreener.php";
 
 class Main {
 
+//    public function run()
+//    {
+//        $ads1 = $this->getRecentAdsFromSite("http://www.gumtree.com.au/s-pets/vic/c18433l3008844?price-type=free");
+//        $ads1 = $this->screenKeywordsForAds($ads1, ['cat', 'kitten', 'kitty']);
+//
+//        $ads2 = $this->getRecentAdsFromSite("http://www.gumtree.com.au/s-livestock/vic/c18457l3008844?price-type=free");
+//        $ads2 = $this->screenKeywordsForAds($ads2, ['cat', 'kitten', 'kitty']);
+//
+//        echo json_encode(array_merge($ads1, $ads2));
+//    }
+
     public function run()
     {
-        $ads = $this->getRecentAdsFromSite("gumtree.html");
+        // 1. Get all the uri to search from
+        $uris = FileManager::loadUris();
 
-//        $dom = $this->downloadWebsite("gumtree.html");
-//        $ads = $this->getMostRecentAdds($dom);
-//
-//        $firstAdd = $ads->find('li', 0);
-//        echo $firstAdd;
+        // 2. Get list of keywords to search
+        $keywords = FileManager::loadKeywords();
+
+        // 3. Get list of words to filter
+        $filters = FileManager::loadFilters();
+
+        // 4. Get list of previous search
+        $previousAds = FileManager::loadPreviousSearch();
     }
 
     /**
@@ -59,11 +76,24 @@ class Main {
         foreach($domAds->find('li') as $domAd) {
             $anAd = AdClass::Factory($domAd);
             if ($anAd != null) {
-              array_push($array, $anAd);
+                array_push($array, $anAd);
             }
         }
 
-        echo json_encode($array);
+        return $array;
+    }
+
+    function screenKeywordsForAds($ads, $keywords)
+    {
+        $array = array();
+        foreach ($ads as $ad) {
+            $ad = AdClassScreener::screenForKeywords($ad, $keywords);
+            if ($ad) {
+                array_push($array, $ad);
+            }
+        }
+
+        return $array;
     }
 }
 
