@@ -7,7 +7,7 @@ class AdClassValidator {
         foreach ($domElement->find('a') as $elem) {
             if (isset($elem->itemprop)) {
                 if ($elem->itemprop == 'url') {
-                    return $elem->href;
+                    return  'http://gumtree.com.au'.$elem->href;
                 }
             }
         }
